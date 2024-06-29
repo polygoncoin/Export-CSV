@@ -47,6 +47,21 @@ class ExportCSV
     public $unlink = true; 
 
     /** 
+     * Constructor
+     * 
+     * @return void 
+     */ 
+    public function __construct()
+    {
+        $requiredExtension = 'mysqli';
+        if (!extension_loaded($requiredExtension)) {
+            if (!dl($requiredExtension . '.so')) {
+                throw new Exception("Required PHP extension '{$requiredExtension}' missing"); 
+            }
+        }
+    }
+
+    /** 
      * Validate Sql query. 
      * 
      * @param $sql MySql query whose output is used to be used to generate a CSV file. 
@@ -55,7 +70,7 @@ class ExportCSV
      */ 
     private function vSql($sql) 
     { 
-        if (empty($sql)) { 
+        if (empty($sql)) {
             throw new Exception('Empty Sql query'); 
         } 
     } 
@@ -104,6 +119,20 @@ class ExportCSV
         $this->username = $username;
         $this->password = $password;
         $this->database = $database;
+
+        $sql = 'SELECT 1;';
+
+        $useTmpFile = $this->useTmpFile;
+        $this->useTmpFile = false;
+        list($shellCommand, $tmpFilename) = $this->getShellCommand($sql);
+        $this->useTmpFile = $useTmpFile;
+
+        $lines = shell_exec($shellCommand);
+        $linesArr = explode(PHP_EOL, $lines);
+
+        if (!($linesArr[0] == '"1"' && $linesArr[1] == '"1"')) {
+            throw new Exception('Issue while connecting to MySQL Client / Host');
+        }
     } 
 
     /** 
