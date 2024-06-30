@@ -1,4 +1,4 @@
-# **PHP-Download-CSV**
+# **Export CSV**
  
 Export / Download MySQL query results as a CSV file
  
