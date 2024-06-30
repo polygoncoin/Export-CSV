@@ -1,0 +1,12 @@
+{
+    "name": "polygoncoin/exportcsv",
+    "description": "Export / Download MySQL query results as a CSV file",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ramesh N Jangid"
+        }
+    ],
+    "require": {}
+}
