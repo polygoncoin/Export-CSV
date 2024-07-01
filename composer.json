@@ -1,6 +1,7 @@
 {
     "name": "polygoncoin/exportcsv",
     "description": "Export / Download MySQL query results as a CSV file",
+    "keywords": ["Export", "Download", "MySQL", "CSV", "Heavy", "Huge", "Memory", "Limit"],
     "type": "library",
     "license": "MIT",
     "authors": [
