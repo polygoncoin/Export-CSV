@@ -12,29 +12,24 @@
 class ExportCSV
 {
     /**
-     * @var MySql hostname.
+     * @var string MySql hostname.
      */
     private $hostname = null;
 
     /**
-     * @var MySql username.
+     * @var string MySql username.
      */
     private $username = null;
 
     /**
-     * @var MySql password.
+     * @var string MySql password.
      */
     private $password = null;
 
     /**
-     * @var MySql database.
+     * @var string MySql database.
      */
     private $database = null;
-
-    /**
-     * @var MySql PDO object.
-     */
-    private $pdo = null;
 
     /** 
      * @var boolean Allow creation of temporary file required for streaming large data. 
@@ -44,7 +39,12 @@ class ExportCSV
     /** 
      * @var boolean Used to remove file once CSV content is transferred on client machine. 
      */ 
-    public $unlink = true; 
+    public $unlink = true;
+
+    /** 
+     * @var string Mysql Client binary location (One can find this by "which mysql" command).
+     */ 
+    private $mysqlClientLoc = '/usr/local/bin/mysql';
 
     /** 
      * Constructor
@@ -58,6 +58,9 @@ class ExportCSV
             if (!dl($requiredExtension . '.so')) {
                 throw new Exception("Required PHP extension '{$requiredExtension}' missing"); 
             }
+        }
+        if (!file_exists($this->mysqlClientLoc)) {
+            throw new Exception('Issue: missing MySQL Client locally');
         }
     }
 
@@ -131,7 +134,7 @@ class ExportCSV
         $linesArr = explode(PHP_EOL, $lines);
 
         if (!($linesArr[0] == '"1"' && $linesArr[1] == '"1"')) {
-            throw new Exception('Issue while connecting to MySQL Client / Host');
+            throw new Exception('Issue while connecting to MySQL Host');
         }
     } 
 
@@ -299,12 +302,12 @@ class ExportCSV
         $this->vSql($sql);
 
         // Shell command. 
-        $shellCommand = 'mysql '
-            . '--host='.escapeshellarg($this->hostname).' '
-            . '--user='.escapeshellarg($this->username).' ' 
-            . '--password='.escapeshellarg($this->password).' '
-            . '--database='.escapeshellarg($this->database).' ' 
-            . '--execute='.escapeshellarg($sql).' '
+        $shellCommand = $this->mysqlClientLoc . ' '
+            . '--host='.escapeshellarg($this->hostname) . ' '
+            . '--user='.escapeshellarg($this->username) . ' ' 
+            . '--password='.escapeshellarg($this->password) . ' '
+            . '--database='.escapeshellarg($this->database) . ' ' 
+            . '--execute='.escapeshellarg($sql) . ' '
             . '| sed -e \'s/"/""/g ; s/\t/","/g ; s/^/"/g ; s/$/"/g\'';
 
         if (!is_null($csvAbsoluteFilePath)) {
