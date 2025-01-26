@@ -31,32 +31,32 @@ class ExportCSV
      */
     private $database = null;
 
-    /** 
-     * @var boolean Allow creation of temporary file required for streaming large data. 
-     */ 
+    /**
+     * @var boolean Allow creation of temporary file required for streaming large data.
+     */
     public $useTmpFile = true;
 
-    /** 
-     * @var boolean Used to remove file once CSV content is transferred on client machine. 
-     */ 
+    /**
+     * @var boolean Used to remove file once CSV content is transferred on client machine.
+     */
     public $unlink = true;
 
-    /** 
+    /**
      * @var string Mysql Client binary location (One can find this by "which mysql" command).
-     */ 
+     */
     private $mysqlClientLoc = '/usr/local/bin/mysql';
 
-    /** 
+    /**
      * Constructor
-     * 
-     * @return void 
-     */ 
+     *
+     * @return void
+     */
     public function __construct()
     {
         $requiredExtension = 'mysqli';
         if (!extension_loaded($requiredExtension)) {
             if (!dl($requiredExtension . '.so')) {
-                throw new Exception("Required PHP extension '{$requiredExtension}' missing"); 
+                throw new Exception("Required PHP extension '{$requiredExtension}' missing");
             }
         }
         if (!file_exists($this->mysqlClientLoc)) {
@@ -64,60 +64,60 @@ class ExportCSV
         }
     }
 
-    /** 
-     * Validate Sql query. 
-     * 
-     * @param $sql MySql query whose output is used to be used to generate a CSV file. 
-     * 
-     * @return void 
-     */ 
-    private function vSql($sql) 
-    { 
+    /**
+     * Validate Sql query.
+     *
+     * @param $sql MySql query whose output is used to be used to generate a CSV file.
+     *
+     * @return void
+     */
+    private function vSql($sql)
+    {
         if (empty($sql)) {
-            throw new Exception('Empty Sql query'); 
-        } 
-    } 
+            throw new Exception('Empty Sql query');
+        }
+    }
 
-    /** 
-     * Validate CSV filename. 
-     * 
-     * @param $csvFilename Name to be used to save CSV file on client machine. 
-     * 
-     * @return void 
-     */ 
-    private function vCsvFilename($csvFilename) 
-    { 
-        if (empty($csvFilename)) { 
-            throw new Exception('Empty CSV filename'); 
-        } 
-    } 
+    /**
+     * Validate CSV filename.
+     *
+     * @param $csvFilename Name to be used to save CSV file on client machine.
+     *
+     * @return void
+     */
+    private function vCsvFilename($csvFilename)
+    {
+        if (empty($csvFilename)) {
+            throw new Exception('Empty CSV filename');
+        }
+    }
 
-    /** 
-     * Validate file location. 
-     * 
-     * @param $csvFilename Name to be used to save CSV file on client machine. 
-     * 
-     * @return void 
-     */ 
-    private function vFileLocation($fileLocation) 
-    { 
-        if (!file_exists($fileLocation)) { 
-            throw new Exception('Invalid file location : ' . $fileLocation); 
-        } 
-    } 
+    /**
+     * Validate file location.
+     *
+     * @param $csvFilename Name to be used to save CSV file on client machine.
+     *
+     * @return void
+     */
+    private function vFileLocation($fileLocation)
+    {
+        if (!file_exists($fileLocation)) {
+            throw new Exception('Invalid file location : ' . $fileLocation);
+        }
+    }
 
-    /** 
-     * Set MySql connection details. 
-     * 
+    /**
+     * Set MySql connection details.
+     *
      * @param $hostname MySql hostname.
      * @param $username MySql username.
      * @param $password MySql password.
      * @param $database MySql database.
-     * 
-     * @return void 
-     */ 
+     *
+     * @return void
+     */
     public function connect($hostname, $username, $password, $database)
-    { 
+    {
         $this->hostname = $hostname;
         $this->username = $username;
         $this->password = $password;
@@ -136,23 +136,23 @@ class ExportCSV
         if (!($linesArr[0] == '"1"' && $linesArr[1] == '"1"')) {
             throw new Exception('Issue while connecting to MySQL Host');
         }
-    } 
+    }
 
-    /** 
-     * Initialise download. 
-     * 
-     * @param $csvFilename         Name to be used to save CSV file on client machine.  
-     * @param $sql                 MySql query whose output is used to be used to generate a CSV file. 
-     * @param $params              MySql query bng params used to generate raw Sql. 
-     * @param $csvAbsoluteFilePath Absolute file path with filename to be used to save CSV.  
-     * 
-     * @return void 
-     */ 
+    /**
+     * Initialise download.
+     *
+     * @param $csvFilename         Name to be used to save CSV file on client machine.
+     * @param $sql                 MySql query whose output is used to be used to generate a CSV file.
+     * @param $params              MySql query bng params used to generate raw Sql.
+     * @param $csvAbsoluteFilePath Absolute file path with filename to be used to save CSV.
+     *
+     * @return void
+     */
     public function initDownload($csvFilename, $sql, $params = [], $csvAbsoluteFilePath = null)
-    { 
-        // Validation 
-        $this->vSql($sql); 
-        $this->vCsvFilename($csvFilename); 
+    {
+        // Validation
+        $this->vSql($sql);
+        $this->vCsvFilename($csvFilename);
 
         $sql = $this->generateRawSqlQuery($sql, $params);
 
@@ -163,50 +163,50 @@ class ExportCSV
             $this->useTmpFile = true;
             $this->unlink = false;
         }
-        
+
         if ($this->useTmpFile) {
-            // Execute shell command 
-            // The shell command to create CSV export file. 
+            // Execute shell command
+            // The shell command to create CSV export file.
             shell_exec($shellCommand);
             $this->streamCsvFile($tmpFilename, $csvFilename);
         } else {
             // Execute shell command
-            // The shell command echos the output. 
+            // The shell command echos the output.
             echo shell_exec($shellCommand);
         }
-    } 
+    }
 
-    /** 
-     * Initialise download. 
-     * 
-     * @param $csvAbsoluteFilePath Absolute file path with filename to be used to save CSV.  
-     * @param $sql                 MySql query whose output is used to be used to generate a CSV file. 
-     * @param $params              MySql query bng params used to generate raw Sql. 
-     * 
-     * @return void 
+    /**
+     * Initialise download.
+     *
+     * @param $csvAbsoluteFilePath Absolute file path with filename to be used to save CSV.
+     * @param $sql                 MySql query whose output is used to be used to generate a CSV file.
+     * @param $params              MySql query bng params used to generate raw Sql.
+     *
+     * @return void
      */
     public function saveCsvExport($csvAbsoluteFilePath, $sql, $params = [])
     {
-        // Validation 
-        $this->vSql($sql); 
+        // Validation
+        $this->vSql($sql);
 
         $sql = $this->generateRawSqlQuery($sql, $params);
 
         list($shellCommand, $tmpFilename) = $this->getShellCommand($sql, $csvAbsoluteFilePath);
 
-        // Execute shell command 
-        // The shell command saves exported CSV data to provided $csvAbsoluteFilePath path. 
+        // Execute shell command
+        // The shell command saves exported CSV data to provided $csvAbsoluteFilePath path.
         shell_exec($shellCommand);
     }
 
-    /** 
+    /**
      * Generate raw Sql query from parameterised query via PDO.
-     * 
-     * @param $sql    MySql query whose output is used to be used to generate a CSV file. 
-     * @param $params MySql query bng params used to generate raw Sql. 
-     * 
+     *
+     * @param $sql    MySql query whose output is used to be used to generate a CSV file.
+     * @param $params MySql query bng params used to generate raw Sql.
+     *
      * @return string
-     */ 
+     */
     private function generateRawSqlQuery($sql, $params)
     {
         if (count($params) > 0) {
@@ -234,7 +234,7 @@ class ExportCSV
                 }
             }
 
-            //Generate bind params 
+            //Generate bind params
             $bindParams = [];
             foreach ($params as $key => $values) {
                 if (is_array($values)) {
@@ -272,41 +272,41 @@ class ExportCSV
         return $sql;
     }
 
-    /** 
+    /**
      * Set CSV file headers
-     * 
-     * @param $csvFilename Name to be used to save CSV file on client machine.  
-     * 
-     * @return void 
-     */ 
+     *
+     * @param $csvFilename Name to be used to save CSV file on client machine.
+     *
+     * @return void
+     */
     private function setCsvHeaders($csvFilename)
     {
-        // CSV headers 
-        header("Content-type: text/csv"); 
-        header("Content-Disposition: attachment; filename={$csvFilename}"); 
-        header("Pragma: no-cache"); 
+        // CSV headers
+        header("Content-type: text/csv");
+        header("Content-Disposition: attachment; filename={$csvFilename}");
+        header("Pragma: no-cache");
         header("Expires: 0");
     }
 
-    /** 
-     * Executes SQL and saves output to a temporary file on server end. 
-     * 
-     * @param $sql                 MySql query whose output is used to be used to generate a CSV file. 
-     * @param $csvAbsoluteFilePath (Optional)Absolute file path with filename to be used to save CSV.  
-     * 
+    /**
+     * Executes SQL and saves output to a temporary file on server end.
+     *
+     * @param $sql                 MySql query whose output is used to be used to generate a CSV file.
+     * @param $csvAbsoluteFilePath (Optional)Absolute file path with filename to be used to save CSV.
+     *
      * @return array
-     */ 
-    private function getShellCommand($sql, $csvAbsoluteFilePath = null) 
-    { 
-        // Validation 
+     */
+    private function getShellCommand($sql, $csvAbsoluteFilePath = null)
+    {
+        // Validation
         $this->vSql($sql);
 
-        // Shell command. 
+        // Shell command.
         $shellCommand = $this->mysqlClientLoc . ' '
             . '--host='.escapeshellarg($this->hostname) . ' '
-            . '--user='.escapeshellarg($this->username) . ' ' 
+            . '--user='.escapeshellarg($this->username) . ' '
             . '--password='.escapeshellarg($this->password) . ' '
-            . '--database='.escapeshellarg($this->database) . ' ' 
+            . '--database='.escapeshellarg($this->database) . ' '
             . '--execute='.escapeshellarg($sql) . ' '
             . '| sed -e \'s/"/""/g ; s/\t/","/g ; s/^/"/g ; s/$/"/g\'';
 
@@ -314,7 +314,7 @@ class ExportCSV
             $tmpFilename = $csvAbsoluteFilePath;
             $shellCommand .= ' > '.escapeshellarg($tmpFilename);
         } elseif ($this->useTmpFile) {
-            // Generate temporary file for storing output of shell command on server side. 
+            // Generate temporary file for storing output of shell command on server side.
             $tmpFilename = tempnam(sys_get_temp_dir(), 'CSV');
             $shellCommand .= ' > '.escapeshellarg($tmpFilename);
         } else {
@@ -323,20 +323,20 @@ class ExportCSV
         }
 
         return [$shellCommand, $tmpFilename];
-    } 
-    /** 
-     * Stream CSV file to client. 
-     * 
-     * @param $fileLocation Abolute file location of CSV file. 
-     * @param $csvFilename  Name to be used to save CSV file on client machine. 
-     * 
-     * @return void 
-     */ 
-    private function streamCsvFile($fileLocation, $csvFilename) 
-    { 
-        // Validation 
-        $this->vFileLocation($fileLocation); 
-        $this->vCsvFilename($csvFilename); 
+    }
+    /**
+     * Stream CSV file to client.
+     *
+     * @param $fileLocation Abolute file location of CSV file.
+     * @param $csvFilename  Name to be used to save CSV file on client machine.
+     *
+     * @return void
+     */
+    private function streamCsvFile($fileLocation, $csvFilename)
+    {
+        // Validation
+        $this->vFileLocation($fileLocation);
+        $this->vCsvFilename($csvFilename);
 
         // Start streaming
         $srcStream = fopen($fileLocation, 'r');
@@ -347,8 +347,8 @@ class ExportCSV
         fclose($destStream);
         fclose($srcStream);
 
-        if ($this->unlink && !unlink($fileLocation)) { // Unable to delete file 
-            //handle error via logs. 
-        } 
-    } 
+        if ($this->unlink && !unlink($fileLocation)) { // Unable to delete file
+            //handle error via logs.
+        }
+    }
 }
