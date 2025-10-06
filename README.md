@@ -2,12 +2,9 @@
 
 Export / Download MySQL query results as a CSV file
 
-
 When it comes to Download CSV, most of the time developer faces issue of memory limit in PHP; especially when supporting downloads of more than 30,000 records at a time.
 
-
 Below class solves this issue by executing shell command for MySql Client installed on the server from PHP script. Using this class one can download all the records in one go. There is no limit to number of rows returned by SQL query.<br>
-
 
 ## Examples
 
@@ -15,7 +12,8 @@ Below class solves this issue by executing shell command for MySql Client instal
 
 ```PHP
 <?php
-require_once __DIR__ . '/Autoload.php';
+
+require_once __DIR__ . '/AutoloadExportCSV.php';
 
 use ExportCSV\ExportCSV;
 
@@ -53,15 +51,15 @@ $csvFilename = 'export.csv';
 try {
     $exportCSV = new ExportCSV(dbType: 'MySQL');
     $exportCSV->connect(
-        hostname: HOSTNAME, 
-        username: USERNAME, 
-        password: PASSWORD, 
+        hostname: HOSTNAME,
+        username: USERNAME,
+        password: PASSWORD,
         database: DATABASE
     );
     $exportCSV->useTmpFile = false; // defaults true for large data export.
     $exportCSV->initDownload(
-        csvFilename: $csvFilename, 
-        sql: $sql, 
+        csvFilename: $csvFilename,
+        sql: $sql,
         params: $params
     );
 } catch (\Exception $e) {
@@ -73,7 +71,8 @@ try {
 
 ```PHP
 <?php
-require_once __DIR__ . '/Autoload.php';
+
+require_once __DIR__ . '/AutoloadExportCSV.php';
 
 use ExportCSV\ExportCSV;
 
@@ -111,13 +110,13 @@ $csvAbsoluteFilePath = '/<folder path>/<filename>.csv';
 try {
     $exportCSV = new ExportCSV(dbType: 'MySQL');
     $exportCSV->connect(
-        hostname: HOSTNAME, 
-        username: USERNAME, 
-        password: PASSWORD, 
+        hostname: HOSTNAME,
+        username: USERNAME,
+        password: PASSWORD,
         database: DATABASE
     );
     $exportCSV->saveCsvExport(
-        sql: $sql, 
+        sql: $sql,
         params: $params,
         csvAbsoluteFilePath:  $csvAbsoluteFilePath
     );
@@ -130,7 +129,8 @@ try {
 
 ```PHP
 <?php
-require_once __DIR__ . '/Autoload.php';
+
+require_once __DIR__ . '/AutoloadExportCSV.php';
 
 use ExportCSV\ExportCSV;
 
@@ -169,15 +169,15 @@ $csvAbsoluteFilePath = '/<folder path>/<filename>.csv';
 try {
     $exportCSV = new ExportCSV(dbType: 'MySQL');
     $exportCSV->connect(
-        hostname: HOSTNAME, 
-        username: USERNAME, 
-        password: PASSWORD, 
+        hostname: HOSTNAME,
+        username: USERNAME,
+        password: PASSWORD,
         database: DATABASE
     );
     $exportCSV->initDownload(
-        csvFilename: $csvFilename, 
-        sql: $sql, 
-        params: $params, 
+        csvFilename: $csvFilename,
+        sql: $sql,
+        params: $params,
         csvAbsoluteFilePath: $csvAbsoluteFilePath
     );
 } catch (\Exception $e) {

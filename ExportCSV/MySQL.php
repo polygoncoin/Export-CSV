@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Export CSV
  * php version 7
@@ -11,6 +12,7 @@
  * @link      https://github.com/polygoncoin/Export-CSV
  * @since     Class available since Release 1.0.0
  */
+
 namespace ExportCSV;
 
 use ExportCSV\DBInterface;
@@ -31,38 +33,38 @@ class MySQL implements DBInterface
 {
     /**
      * Hostname
-     * 
+     *
      * @var null|string
      */
-    private $_hostname = null;
+    private $hostname = null;
 
     /**
      * Username
-     * 
+     *
      * @var null|string
      */
-    private $_username = null;
+    private $username = null;
 
     /**
      * Password
-     * 
-     * @var null|string 
+     *
+     * @var null|string
      */
-    private $_password = null;
+    private $password = null;
 
     /**
      * Database
-     * 
+     *
      * @var null|string
      */
-    private $_database = null;
+    private $database = null;
 
     /**
      * Mysql Client binary location (One can find this by "which mysql" command)
-     * 
+     *
      * @var string
      */
-    private $_binaryLoc = '/usr/local/bin/mysql';
+    private $binaryLoc = '/usr/local/bin/mysql';
 
     /**
      * Constructor
@@ -80,7 +82,7 @@ class MySQL implements DBInterface
                 );
             }
         }
-        if (!file_exists(filename: $this->_binaryLoc)) {
+        if (!file_exists(filename: $this->binaryLoc)) {
             throw new \Exception(message: 'Issue: missing MySQL Client locally');
         }
     }
@@ -98,10 +100,10 @@ class MySQL implements DBInterface
      */
     public function connect($hostname, $username, $password, $database): void
     {
-        $this->_hostname = $hostname;
-        $this->_username = $username;
-        $this->_password = $password;
-        $this->_database = $database;
+        $this->hostname = $hostname;
+        $this->username = $username;
+        $this->password = $password;
+        $this->database = $database;
     }
 
     /**
@@ -113,7 +115,7 @@ class MySQL implements DBInterface
      * @return void
      * @throws \Exception
      */
-    private function _validate($sql, $params): void
+    private function validate($sql, $params): void
     {
         if (empty($sql)) {
             throw new \Exception(message: 'Empty Sql query');
@@ -124,10 +126,11 @@ class MySQL implements DBInterface
         }
 
         //Validate parameterized query.
-        if (substr_count(
-            haystack: $sql, 
-            needle: ':'
-        ) !== count(value: $params)
+        if (
+            substr_count(
+                haystack: $sql,
+                needle: ':'
+            ) !== count(value: $params)
         ) {
             throw new \Exception(
                 message: 'Parameterized query has mismatch in number of params'
@@ -146,11 +149,12 @@ class MySQL implements DBInterface
             $paramPos[$value] = strpos(haystack: $sql, needle: $value);
         }
         foreach ($paramPos as $key => $value) {
-            if (substr(
-                string: $sql, 
-                offset: $value, 
-                length: strlen(string: $key)
-            ) !== $key
+            if (
+                substr(
+                    string: $sql,
+                    offset: $value,
+                    length: strlen(string: $key)
+                ) !== $key
             ) {
                 throw new \Exception(message: "Invalid param key '{$key}'");
             }
@@ -166,20 +170,20 @@ class MySQL implements DBInterface
      * @return string
      * @throws \Exception
      */
-    private function _generateRawSqlQuery($sql, $params): string
+    private function generateRawSqlQuery($sql, $params): string
     {
         if (empty($params) || count(value: $params) === 0) {
             return $sql;
         }
 
-        $this->_validate(sql: $sql, params: $params);
+        $this->validate(sql: $sql, params: $params);
 
         //mysqli connection
         $mysqli = mysqli_connect(
-            hostname: $this->_hostname, 
-            username: $this->_username, 
-            password: $this->_password, 
-            database: $this->_database
+            hostname: $this->hostname,
+            username: $this->username,
+            password: $this->password,
+            database: $this->database
         );
         if (!$mysqli) {
             throw new \Exception(
@@ -199,20 +203,20 @@ class MySQL implements DBInterface
                             message: "Invalid params for key '{$key}'"
                         );
                     }
-                    $newKey = $key.$count;
+                    $newKey = $key . $count;
                     if (in_array(needle: $newKey, haystack: $tmpParams)) {
                         throw new \Exception(
                             message: "Invalid parameterized params '{$newKey}'"
                         );
                     }
-                    $tmpParams[$key.$count++] = $value;
+                    $tmpParams[$key . $count++] = $value;
                 }
                 $sql = str_replace(
-                    search: $key, 
+                    search: $key,
                     replace: implode(
-                        separator: ', ', 
+                        separator: ', ',
                         array: array_keys(array: $tmpParams)
-                    ), 
+                    ),
                     subject: $sql
                 );
                 $bindParams = array_merge($bindParams, $tmpParams);
@@ -224,11 +228,11 @@ class MySQL implements DBInterface
         //Replace parameterized values.
         foreach ($bindParams as $key => $value) {
             if (!ctype_digit(text: $value)) {
-                $value = "'" . 
+                $value = "'" .
                     mysqli_real_escape_string(
-                        mysql: $mysqli, 
+                        mysql: $mysqli,
                         string: $value
-                    ) . 
+                    ) .
                 "'";
             }
             $sql = str_replace(search: $key, replace: $value, subject: $sql);
@@ -250,15 +254,15 @@ class MySQL implements DBInterface
      */
     public function getShellCommand($sql, $params = null): string
     {
-        $sql = $this->_generateRawSqlQuery(sql: $sql, params: $params);
+        $sql = $this->generateRawSqlQuery(sql: $sql, params: $params);
 
         // Shell command.
-        $shellCommand = $this->_binaryLoc . ' '
-            . '--host='.escapeshellarg(arg: $this->_hostname) . ' '
-            . '--user='.escapeshellarg(arg: $this->_username) . ' '
-            . '--password='.escapeshellarg(arg: $this->_password) . ' '
-            . '--database='.escapeshellarg(arg: $this->_database) . ' '
-            . '--execute='.escapeshellarg(arg: $sql);
+        $shellCommand = $this->binaryLoc . ' '
+            . '--host=' . escapeshellarg(arg: $this->hostname) . ' '
+            . '--user=' . escapeshellarg(arg: $this->username) . ' '
+            . '--password=' . escapeshellarg(arg: $this->password) . ' '
+            . '--database=' . escapeshellarg(arg: $this->database) . ' '
+            . '--execute=' . escapeshellarg(arg: $sql);
 
         return $shellCommand;
     }

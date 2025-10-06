@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Export CSV
  * php version 7
@@ -11,6 +12,7 @@
  * @link      https://github.com/polygoncoin/Export-CSV
  * @since     Class available since Release 1.0.0
  */
+
 namespace ExportCSV;
 
 use ExportCSV\DBInterface;
@@ -31,21 +33,21 @@ class DB
 {
     /**
      * Allow creation of temporary file required for streaming large data
-     * 
+     *
      * @var bool
      */
     public $useTmpFile = false;
 
     /**
      * DB Engine
-     * 
+     *
      * @var null|string
      */
     public $dbType = null;
 
     /**
      * DB Class Object as per dbType
-     * 
+     *
      * @var null|DBInterface
      */
     public $dbTypeObj = null;
@@ -76,9 +78,9 @@ class DB
     public function connect($hostname, $username, $password, $database): void
     {
         $this->dbTypeObj->connect(
-            hostname: $hostname, 
-            username: $username, 
-            password: $password, 
+            hostname: $hostname,
+            username: $username,
+            password: $password,
             database: $database
         );
     }

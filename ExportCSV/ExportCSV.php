@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Export CSV
  * php version 7
@@ -11,6 +12,7 @@
  * @link      https://github.com/polygoncoin/Export-CSV
  * @since     Class available since Release 1.0.0
  */
+
 namespace ExportCSV;
 
 use ExportCSV\DB;
@@ -31,28 +33,28 @@ class ExportCSV
 {
     /**
      * Allow creation of temporary file required for streaming large data
-     * 
+     *
      * @var bool
      */
     public $useTmpFile = true;
 
     /**
      * Used to remove file once CSV content is transferred on client machine
-     * 
+     *
      * @var bool
      */
     public $unlink = true;
 
     /**
      * DB Engine
-     * 
+     *
      * @var null|string
      */
     public $dbType = null;
 
     /**
      * DB Object
-     * 
+     *
      * @var null|DB
      */
     public $db = null;
@@ -84,14 +86,13 @@ class ExportCSV
     public function connect($hostname, $username, $password, $database): void
     {
         $this->db->connect(
-            hostname: $hostname, 
-            username: $username, 
-            password: $password, 
+            hostname: $hostname,
+            username: $username,
+            password: $password,
             database: $database
         );
-        $this->_validateConnection();
+        $this->validateConnection();
     }
-
 
     /**
      * Validate Connection
@@ -99,13 +100,13 @@ class ExportCSV
      * @return void
      * @throws \Exception
      */
-    private function _validateConnection(): void
+    private function validateConnection(): void
     {
         $sql = 'SELECT 1;';
 
         $toggle = $this->useTmpFile;
         $this->useTmpFile = false;
-        [$shellCommand, $tmpFilename] = $this->_getShellCommand(
+        [$shellCommand, $tmpFilename] = $this->getShellCommand(
             sql: $sql
         );
         $this->useTmpFile = $toggle;
@@ -126,7 +127,7 @@ class ExportCSV
      * @return void
      * @throws \Exception
      */
-    private function _vFileLocation($fileLocation): void
+    private function vFileLocation($fileLocation): void
     {
         if (!file_exists(filename: $fileLocation)) {
             throw new \Exception(
@@ -145,9 +146,9 @@ class ExportCSV
      * @return array
      * @throws \Exception
      */
-    private function _getShellCommand(
-        $sql, 
-        $params = [], 
+    private function getShellCommand(
+        $sql,
+        $params = [],
         $csvAbsoluteFilePath = null
     ): array {
         $shellCommand = $this->db->getShellCommand(sql: $sql, params: $params);
@@ -155,11 +156,11 @@ class ExportCSV
 
         if (!is_null(value: $csvAbsoluteFilePath)) {
             $tmpFilename = $csvAbsoluteFilePath;
-            $shellCommand .= ' > '.escapeshellarg(arg: $tmpFilename);
+            $shellCommand .= ' > ' . escapeshellarg(arg: $tmpFilename);
         } elseif ($this->useTmpFile) {
             // Generate temporary file for storing output of shell command on server
             $tmpFilename = tempnam(directory: sys_get_temp_dir(), prefix: 'CSV');
-            $shellCommand .= ' > '.escapeshellarg(arg: $tmpFilename);
+            $shellCommand .= ' > ' . escapeshellarg(arg: $tmpFilename);
         } else {
             $tmpFilename = null;
             $shellCommand .= ' 2>&1';
@@ -167,7 +168,7 @@ class ExportCSV
 
         return [$shellCommand, $tmpFilename];
     }
-    
+
     /**
      * Initialize download.
      *
@@ -179,13 +180,13 @@ class ExportCSV
      * @return void
      */
     public function initDownload(
-        $csvFilename, 
-        $sql, 
-        $params = [], 
+        $csvFilename,
+        $sql,
+        $params = [],
         $csvAbsoluteFilePath = null
     ): void {
-        [$shellCommand, $tmpFilename] = $this->_getShellCommand(
-            sql: $sql, 
+        [$shellCommand, $tmpFilename] = $this->getShellCommand(
+            sql: $sql,
             params: $params,
             csvAbsoluteFilePath: $csvAbsoluteFilePath
         );
@@ -199,13 +200,13 @@ class ExportCSV
             // Execute shell command
             // The shell command to create CSV export file.
             shell_exec(command: $shellCommand);
-            $this->_streamCsvFile(
-                fileLocation: $tmpFilename, 
+            $this->streamCsvFile(
+                fileLocation: $tmpFilename,
                 csvFilename: $csvFilename
             );
         } else {
             // Set headers
-            $this->_setCsvHeaders(csvFilename: $csvFilename);
+            $this->setCsvHeaders(csvFilename: $csvFilename);
 
             // Execute shell command
             // The shell command echos the output.
@@ -223,12 +224,12 @@ class ExportCSV
      * @return void
      */
     public function saveCsvExport(
-        $sql, 
-        $params = [], 
+        $sql,
+        $params = [],
         $csvAbsoluteFilePath = null
     ): void {
-        [$shellCommand, $tmpFilename] = $this->_getShellCommand(
-            sql: $sql, 
+        [$shellCommand, $tmpFilename] = $this->getShellCommand(
+            sql: $sql,
             params: $params,
             csvAbsoluteFilePath: $csvAbsoluteFilePath
         );
@@ -245,7 +246,7 @@ class ExportCSV
      *
      * @return void
      */
-    private function _setCsvHeaders($csvFilename): void
+    private function setCsvHeaders($csvFilename): void
     {
         // CSV headers
         header(header: "Content-type: text/csv");
@@ -262,13 +263,13 @@ class ExportCSV
      *
      * @return void
      */
-    private function _streamCsvFile($fileLocation, $csvFilename): void
+    private function streamCsvFile($fileLocation, $csvFilename): void
     {
         // Validation
-        $this->_vFileLocation(fileLocation: $fileLocation);
+        $this->vFileLocation(fileLocation: $fileLocation);
 
         // Set headers
-        $this->_setCsvHeaders(csvFilename: $csvFilename);
+        $this->setCsvHeaders(csvFilename: $csvFilename);
 
         // Start streaming
         $srcStream = fopen(filename: $fileLocation, mode: 'r');
