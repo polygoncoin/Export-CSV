@@ -69,7 +69,6 @@ class MySQL implements DBInterface
     /**
      * Constructor
      *
-     * @return void
      * @throws \Exception
      */
     public function __construct()
