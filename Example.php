@@ -9,7 +9,7 @@ $sql = "
     SELECT
         *
     FROM
-        m001_master_clients
+        clients
 ";
 
 $params = [];
